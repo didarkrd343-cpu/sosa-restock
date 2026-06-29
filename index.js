@@ -29,7 +29,7 @@ app.get("/test-restock", async (req, res) => {
     const embed = new EmbedBuilder()
       .setTitle("Test Produkt ✅ Restocked")
       .setDescription("Testmeldung")
-      .setColor(0xdc2626)
+      .setColor(0xdc2626) // ROTE LEISTE
       .addFields(
         { name: "Variante", value: "Test", inline: true },
         { name: "Preis", value: "5.99", inline: true },
@@ -37,7 +37,8 @@ app.get("/test-restock", async (req, res) => {
       )
       .setTimestamp();
 
-    await kanal.send({ content: "<@&DEINE_ROLLEN_ID>", embeds: [embed] });
+    // ✅ Deine Rolle wird angepingt
+    await kanal.send({ content: "<@&1520996484538040342>", embeds: [embed] });
     res.send("✅ Test gesendet");
   } catch (err) {
     res.status(500).send("❌ Fehler: " + err.message);
@@ -77,9 +78,9 @@ app.get("/restock", async (req, res) => {
 
     if (bild && bild.startsWith("http")) embed.setImage(bild);
 
-    // 👇 NUR die Rolle anpingen, sonst nichts
+    // ✅ Deine Rolle wird angepingt – nur @restock, kein zusätzlicher Text
     await kanal.send({
-      content: "<@&DEINE_ROLLEN_ID>",
+      content: "<@&1520996484538040342>",
       embeds: [embed]
     });
 
