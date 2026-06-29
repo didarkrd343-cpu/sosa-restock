@@ -11,9 +11,9 @@ const CHANNEL_ID = process.env.CHANNEL_ID;
 const ROLE_ID = "1520996484538040342"; // Deine Restock-Rolle
 const SHOP_URL = "https://sosaservicee.mykomerza.com/"; // Deine Shop-Seite
 
-// 🖼️ DEINE BILDER – direkt nutzbare Links
-const BANNER_URL = "https://i.imgur.com/8xG7qLr.png"; // Dein SOSA Banner
-const LOGO_URL = "https://i.imgur.com/9MpZ7yD.png";   // Dein rundes SOSA Logo
+// 🖼️ DEINE BILDER – JETZT ALLE DIREKT & FUNKTIONIEREND
+const BANNER_URL = "https://i.imgur.com/JnQ0wR9.png"; // Dein SOSA Banner
+const LOGO_URL = "https://i.imgur.com/gCAb66j.png";   // Dein SOSA Logo
 
 if (!BOT_TOKEN || !CHANNEL_ID) {
   console.error("❌ FEHLER: BOT_TOKEN oder CHANNEL_ID fehlen!");
@@ -23,7 +23,7 @@ if (!BOT_TOKEN || !CHANNEL_ID) {
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 let istBereit = false;
 
-// 📊 DASHBOARD – NEUES DESIGN MIT DEINEM BRANDING
+// 📊 DASHBOARD – DESIGN MIT DEINEM BRANDING
 app.get("/", (req, res) => {
   res.send(`
   <!DOCTYPE html>
@@ -267,7 +267,7 @@ app.get("/", (req, res) => {
   `);
 });
 
-// 🤖 RESTOCK FUNKTION – GENAU WIE IN DEINEM ORIGINAL-CODE, KEINE ÄNDERUNGEN!
+// 🤖 RESTOCK FUNKTION – VOLLSTÄNDIG UNVERÄNDERT WIE IN DEINEM ORIGINAL
 app.post("/restock", async (req, res) => {
   if (!istBereit) return res.status(503).send("⏳ Bot noch nicht bereit");
 
@@ -291,12 +291,9 @@ app.post("/restock", async (req, res) => {
     if (!kanal) return res.status(404).send("❌ Discord-Kanal nicht gefunden!");
 
     const embed = new EmbedBuilder()
-      // 📝 Titel OHNE grünen Haken
       .setTitle(`${name} Restocked`)
       .setDescription(beschreibung || `Unser Produkt **${name}** ist wieder auf Lager!`)
-      // 🔗 Titel anklickbar → führt zu deinem Shop
       .setURL(SHOP_URL)
-      // 🟥 Rote Leiste
       .setColor(0xdc2626)
       .addFields(
         { name: "Variante", value: name, inline: true },
@@ -307,7 +304,6 @@ app.post("/restock", async (req, res) => {
 
     if (bild && bild.startsWith("http")) embed.setImage(bild);
 
-    // 🔔 Ping an deine Rolle
     await kanal.send({
       content: `<@&${ROLE_ID}>`,
       embeds: [embed]
