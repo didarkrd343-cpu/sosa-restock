@@ -11,9 +11,9 @@ const CHANNEL_ID = process.env.CHANNEL_ID;
 const ROLE_ID = "1520996484538040342";
 const SHOP_URL = "https://sosaservicee.mykomerza.com/";
 
-// 🖼️ DEINE BILDER (gültige Links)
-const BANNER_URL = "https://i.imgur.com/Td9AA5M.png"; // Banner
-const LOGO_URL = "https://i.imgur.com/Td9AA5M.png";   // Logo
+// 🖼️ DEINE BILDER (jetzt korrekte direkte Links)
+const BANNER_URL = "https://i.imgur.com/b1d274e3-2cf7-4966-8e6c-aa4f300aaf44.png"; // Neuer Hintergrund-Banner
+const LOGO_URL = "https://i.imgur.com/Td9AA5M.png"; // Rundes Logo darüber
 
 if (!BOT_TOKEN || !CHANNEL_ID) {
   console.error("❌ FEHLER: BOT_TOKEN oder CHANNEL_ID fehlen!");
@@ -55,26 +55,26 @@ app.get("/", (req, res) => {
         margin: 0 auto;
       }
 
+      /* 🎯 HEADER BEREICH: Banner als Hintergrund */
       .header {
         text-align: center;
         margin-bottom: 3rem;
-      }
-
-      .banner {
-        width: 100%;
-        max-height: 260px;
-        object-fit: cover;
+        position: relative;
+        padding: 2rem 1rem;
         border-radius: 14px;
         border: 2px solid rgba(220, 38, 38, 0.55);
         box-shadow: 0 0 40px rgba(220, 38, 38, 0.45);
-      }
-
-      .logo-wrapper {
-        margin-top: -65px;
+        /* Dein Bild als Hintergrund */
+        background: url("${BANNER_URL}") center / cover no-repeat;
+        min-height: 220px;
         display: flex;
-        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        padding-bottom: 2rem;
       }
 
+      /* Rundes Logo in der Mitte über dem Banner */
       .logo {
         width: 130px;
         height: 130px;
@@ -83,6 +83,9 @@ app.get("/", (req, res) => {
         box-shadow: 0 0 35px rgba(220, 38, 38, 0.6);
         background: #050505;
         padding: 6px;
+        margin-top: -65px;
+        position: relative;
+        z-index: 2;
       }
 
       h1 {
@@ -90,14 +93,19 @@ app.get("/", (req, res) => {
         font-size: 2.4rem;
         font-weight: 800;
         color: #dc2626;
-        text-shadow: 0 0 20px rgba(220, 38, 38, 0.6);
+        text-shadow: 0 0 20px rgba(220, 38, 38, 0.8), 0 0 40px rgba(0,0,0,0.9);
         letter-spacing: 2.5px;
+        position: relative;
+        z-index: 2;
       }
 
       .subhead {
-        color: #a0a0a0;
+        color: #e0e0e0;
         font-size: 1.05rem;
         margin-top: 0.5rem;
+        text-shadow: 0 0 15px rgba(0,0,0,0.9);
+        position: relative;
+        z-index: 2;
       }
 
       .form-card {
@@ -190,10 +198,7 @@ app.get("/", (req, res) => {
   <body>
     <div class="container">
       <div class="header">
-        <img src="${BANNER_URL}" alt="SOSA Service Banner" class="banner">
-        <div class="logo-wrapper">
-          <img src="${LOGO_URL}" alt="SOSA Service Logo" class="logo">
-        </div>
+        <img src="${LOGO_URL}" alt="SOSA Service Logo" class="logo">
         <h1>SOSA SERVICE</h1>
         <p class="subhead">Restock Bot • Steuerung & Verwaltung</p>
       </div>
