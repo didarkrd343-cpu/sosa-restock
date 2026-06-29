@@ -4,53 +4,51 @@ const express = require('express');
 const app = express();
 app.use(express.json());
 
-// Geheime Daten kommen später sicher in Railway
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const CHANNEL_ID = process.env.CHANNEL_ID;
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 app.post("/komerza", async (req, res) => {
-  const daten = req.body;
-  const alt = Number(daten.old_quantity ?? daten.previous_quantity ?? 0);
-  const neu = Number(daten.new_quantity ?? daten.current_quantity ?? 0);
+  console.log("📥 Daten erhalten:", req.body);
+  const alt = Number(req.body.old_quantity ?? req.body.previous_quantity ?? 0);
+  const neu = Number(req.body.new_quantity ?? req.body.current_quantity ?? 0);
 
-  if (!(alt <= 0 && neu > 0)) return res.send({ status: "ignoriert" });
+  console.log(`📊 Bestand: alt=${alt} → neu=${neu}`);
 
-  const produkt = daten.product ?? {};
-  const variante = daten.variant ?? {};
+  if (neu <= alt) {
+    console.log("ℹ️ Keine Erhöhung → ignoriert");
+    return res.send({ status: "ignoriert" });
+  }
 
-  const produktName = produkt.name ?? "Unbenanntes Produkt";
-  const varName = variante.title ?? produkt.name ?? "Standard";
-  const preis = variante.price ?? produkt.price ?? "0.00";
-  const bestand = neu;
-  const link = produkt.url ?? "#";
-  const bild = produkt.image_url ?? "";
+  const produkt = req.body.product ?? {};
+  const variante = req.body.variant ?? {};
 
   const embed = new EmbedBuilder()
-    .setTitle(`${produktName} ist wieder auf Lager!`)
-    .setDescription(`**${produktName}** wurde nachgefüllt!\n[Zum Produkt](${link})`)
+    .setTitle(`${produkt.name || "Produkt"} | Bestand erhöht`)
+    .setDescription(`Vorher: ${alt} → Jetzt: ${neu}\n${produkt.url || "#"}`)
     .addFields(
-      { name: "Variante", value: varName, inline: true },
-      { name: "Preis", value: `$${preis}`, inline: true },
-      { name: "Verfügbar", value: `${bestand}`, inline: true }
+      { name: "Variante", value: variante.title || "-", inline: true },
+      { name: "Preis", value: variante.price || "-", inline: true },
+      { name: "Neuer Bestand", value: String(neu), inline: true }
     )
-    .setColor(0x0099FF)
-    .setImage(bild)
+    .setColor("#2ecc71")
     .setTimestamp();
 
   try {
     const kanal = client.channels.cache.get(CHANNEL_ID);
-    if (kanal) await kanal.send({ content: "@restock", embeds: [embed] });
+    if (!kanal) throw new Error("Kanal nicht gefunden");
+    await kanal.send({ content: "@restock", embeds: [embed] });
+    console.log("✅ Nachricht gesendet");
     return res.send({ status: "ok" });
   } catch (err) {
-    console.error("Fehler:", err);
+    console.error("❌ Fehler:", err.message);
     return res.status(500).send({ status: "fehler" });
   }
 });
 
-client.on("ready", () => console.log("✅ Bot ist verbunden"));
+client.on("ready", () => console.log("✅ Bot verbunden"));
 client.login(BOT_TOKEN);
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("🚀 Empfangsbereit für Komerza"));
+app.listen(PORT, () => console.log("🚀 Webhook lauscht auf /komerza"));
