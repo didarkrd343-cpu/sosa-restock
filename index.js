@@ -10,12 +10,11 @@ const BOT_TOKEN = process.env.BOT_TOKEN;
 const CHANNEL_ID = process.env.CHANNEL_ID;
 const ROLE_ID = "1520996484538040342";
 const SHOP_URL = "https://sosaservicee.mykomerza.com/";
-// 🔐 Passwort für Dashboard
 const ADMIN_PASSWORT = "SOSA2026";
 
-// 🖼️ DEINE BILDER
-const BANNER_URL = "https://i.imgur.com/LUUFW8O.png";
-const LOGO_URL = "https://i.imgur.com/7Yd5Q8R.png";
+// 🖼️ BILDER NUR FÜR DAS DASHBOARD
+const DASHBOARD_BANNER = "https://i.imgur.com/dbd3d324-c84a-4352-bde9-531d05dd6745.png";
+const DASHBOARD_LOGO = "https://i.imgur.com/22ef5fb8-4f99-4c13-9713-d60d0e57daa0.png";
 
 if (!BOT_TOKEN || !CHANNEL_ID) {
   console.error("❌ FEHLER: BOT_TOKEN oder CHANNEL_ID fehlen!");
@@ -25,7 +24,7 @@ if (!BOT_TOKEN || !CHANNEL_ID) {
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 let istBereit = false;
 
-// 🔐 Zugriffsschutz
+// 🔐 Passwortschutz
 function nurAdmin(req, res, next) {
   const pass = req.headers['x-passwort'] || req.query.pass;
   if (pass === ADMIN_PASSWORT) return next();
@@ -55,7 +54,7 @@ function nurAdmin(req, res, next) {
   `);
 }
 
-// 🚀 DASHBOARD
+// 🚀 DASHBOARD mit deinen neuen Bildern
 app.get("/", nurAdmin, (req, res) => {
   res.send(`
   <!DOCTYPE html>
@@ -68,7 +67,7 @@ app.get("/", nurAdmin, (req, res) => {
       * {margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
       body {background:#050505;color:#f8f8f8;min-height:100vh;padding:2rem 1.2rem;background-image:radial-gradient(circle at top left,rgba(220,38,38,0.2) 0%,transparent 45%),radial-gradient(circle at bottom right,rgba(220,38,38,0.15) 0%,transparent 50%);}
       .container {max-width:760px;margin:0 auto;}
-      .header {text-align:center;margin-bottom:3rem;position:relative;padding:2rem 1rem;border-radius:14px;border:2px solid rgba(220,38,38,0.55);box-shadow:0 0 40px rgba(220,38,38,0.45);background:url("${BANNER_URL}") center / cover no-repeat;min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:2rem;}
+      .header {text-align:center;margin-bottom:3rem;position:relative;padding:2rem 1rem;border-radius:14px;border:2px solid rgba(220,38,38,0.55);box-shadow:0 0 40px rgba(220,38,38,0.45);background:url("${DASHBOARD_BANNER}") center / cover no-repeat;min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:2rem;}
       .logo {width:130px;height:130px;border-radius:50%;border:4px solid #dc2626;box-shadow:0 0 35px rgba(220,38,38,0.6);background:#050505;padding:6px;margin-top:-65px;position:relative;z-index:2;}
       h1 {margin-top:1.2rem;font-size:2.4rem;font-weight:800;color:#dc2626;text-shadow:0 0 20px rgba(220,38,38,0.8),0 0 40px rgba(0,0,0,0.9);letter-spacing:2.5px;position:relative;z-index:2;}
       .subhead {color:#e0e0e0;font-size:1.05rem;margin-top:0.5rem;text-shadow:0 0 15px rgba(0,0,0,0.9);position:relative;z-index:2;}
@@ -88,7 +87,7 @@ app.get("/", nurAdmin, (req, res) => {
   <body>
     <div class="container">
       <div class="header">
-        <img src="${LOGO_URL}" alt="SOSA Service Logo" class="logo">
+        <img src="${DASHBOARD_LOGO}" alt="SOSA Service Logo" class="logo">
         <h1>SOSA SERVICE</h1>
         <p class="subhead">Restock Bot • Steuerung & Verwaltung</p>
       </div>
@@ -106,7 +105,7 @@ app.get("/", nurAdmin, (req, res) => {
           <input type="number" id="neu" placeholder="z.B. 21" required>
         </div>
         <div class="form-group">
-          <label>💰 Preis (nur Zahl)</label>
+          <label>💰 Preis</label>
           <input type="text" id="preis" placeholder="z.B. 0.15">
         </div>
         <div class="form-group">
@@ -157,7 +156,7 @@ app.get("/", nurAdmin, (req, res) => {
   `);
 });
 
-// 🤖 RESTOCK NACHRICHT – GENAU WIE ZUVOR
+// 🤖 DISCORD NACHRICHT – MIT €, OHNE LOGO, GENAU PASSEND
 app.post("/restock", nurAdmin, async (req, res) => {
   if (!istBereit) return res.status(503).send("⏳ Bot ist noch nicht bereit – bitte warten");
 
@@ -180,23 +179,21 @@ app.post("/restock", nurAdmin, async (req, res) => {
     const kanal = client.channels.cache.get(CHANNEL_ID);
     if (!kanal) return res.status(404).send("❌ Discord-Kanal nicht gefunden!");
 
-    // ✅ Preis mit €-Zeichen, genau wie im oberen Bild
+    // ✅ PREIS MIT €-ZEICHEN, KEIN LOGO, KEIN FOOTER-BILD
     const preisMitEuro = preis ? `${preis} €` : "-";
 
     const embed = new EmbedBuilder()
       .setTitle(`${name} Restocked`)
-      .setDescription(beschreibung || `Unser Produkt **${name}** ist wieder auf Lager!`)
+      .setDescription(beschreibung || `Unser Produkt ${name} ist wieder auf Lager!`)
       .setURL(SHOP_URL)
-      .setColor(0xdc2626) // Rote Leiste
+      .setColor(0xdc2626) // ROTE LEISTE
       .addFields(
         { name: "Variante", value: name, inline: true },
         { name: "Preis", value: preisMitEuro, inline: true },
         { name: "Verfügbar", value: `${neuZahl}`, inline: true }
       )
-      .setTimestamp()
-      .setFooter({ text: "SOSA Service • Restock Bot", iconURL: LOGO_URL });
+      .setTimestamp();
 
-    // Bild nur hinzufügen, wenn du eins angibst
     if (bild && bild.startsWith("http")) embed.setImage(bild);
 
     await kanal.send({
@@ -204,7 +201,7 @@ app.post("/restock", nurAdmin, async (req, res) => {
       embeds: [embed]
     });
 
-    return res.send("✅ Erfolgreich! Restock wurde an Discord gesendet.");
+    return res.send("✅ Erfolgreich! Restock gesendet.");
   } catch (err) {
     console.error("Fehler bei Restock:", err);
     return res.status(500).send("❌ Fehler: " + err.message);
