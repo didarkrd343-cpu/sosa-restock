@@ -5,10 +5,11 @@ const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: '500kb' }));
 
-// Deine Einstellungen
+// Deine festen Einstellungen
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const CHANNEL_ID = process.env.CHANNEL_ID;
 const ROLE_ID = "1520996484538040342"; // Deine Restock-Rolle
+const SHOP_URL = "https://sosaservicee.mykomerza.com/"; // Deine Shop-Seite
 
 if (!BOT_TOKEN || !CHANNEL_ID) {
   console.error("❌ FEHLER: BOT_TOKEN oder CHANNEL_ID fehlen!");
@@ -18,7 +19,7 @@ if (!BOT_TOKEN || !CHANNEL_ID) {
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 let istBereit = false;
 
-// 📊 DASHBOARD Oberfläche
+// 📊 Dashboard Oberfläche
 app.get("/", (req, res) => {
   res.send(`
   <!DOCTYPE html>
@@ -48,7 +49,7 @@ app.get("/", (req, res) => {
     <div class="form-box">
       <div class="form-group">
         <label>Produktname:</label>
-        <input type="text" id="name" placeholder="z.B. GTA V Account" required>
+        <input type="text" id="name" placeholder="z.B. Minecraft Accounts" required>
       </div>
       <div class="form-group">
         <label>Vorheriger Bestand:</label>
@@ -56,11 +57,11 @@ app.get("/", (req, res) => {
       </div>
       <div class="form-group">
         <label>Neuer Bestand:</label>
-        <input type="number" id="neu" placeholder="z.B. 15" required>
+        <input type="number" id="neu" placeholder="z.B. 20" required>
       </div>
       <div class="form-group">
         <label>Preis:</label>
-        <input type="text" id="preis" placeholder="z.B. 8.99">
+        <input type="text" id="preis" placeholder="z.B. 4.99">
       </div>
       <div class="form-group">
         <label>Bild-Link:</label>
@@ -68,7 +69,7 @@ app.get("/", (req, res) => {
       </div>
       <div class="form-group">
         <label>Beschreibung:</label>
-        <textarea id="beschreibung" rows="2" placeholder="z.B. GTA Accounts wieder verfügbar!"></textarea>
+        <textarea id="beschreibung" rows="2" placeholder="z.B. Minecraft Accounts wieder auf Lager!"></textarea>
       </div>
       <button onclick="senden()">Restock senden</button>
       <div id="status"></div>
@@ -133,9 +134,13 @@ app.post("/restock", async (req, res) => {
     if (!kanal) return res.status(404).send("❌ Discord-Kanal nicht gefunden!");
 
     const embed = new EmbedBuilder()
-      .setTitle(`${name} ✅ Restocked`)
+      // 📝 Titel OHNE grünen Haken
+      .setTitle(`${name} Restocked`)
       .setDescription(beschreibung || `Unser Produkt **${name}** ist wieder auf Lager!`)
-      .setColor(0xdc2626) // ROTE LEISTE
+      // 🔗 Titel anklickbar → führt zu deinem Shop
+      .setURL(SHOP_URL)
+      // 🟥 Rote Leiste
+      .setColor(0xdc2626)
       .addFields(
         { name: "Variante", value: name, inline: true },
         { name: "Preis", value: preis || "-", inline: true },
@@ -145,13 +150,13 @@ app.post("/restock", async (req, res) => {
 
     if (bild && bild.startsWith("http")) embed.setImage(bild);
 
-    // ✅ Ping an deine Rolle
+    // 🔔 Ping an deine Rolle
     await kanal.send({
       content: `<@&${ROLE_ID}>`,
       embeds: [embed]
     });
 
-    return res.send("✅ Restock erfolgreich an Discord gesendet!");
+    return res.send("✅ Restock erfolgreich gesendet! Titel führt zu deinem Shop.");
   } catch (err) {
     console.error("Fehler:", err);
     return res.status(500).send("❌ Fehler: " + err.message);
