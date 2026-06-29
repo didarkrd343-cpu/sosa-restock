@@ -65,7 +65,7 @@ client.on("warn", (warn) => {
     await client.login(BOT_TOKEN);
     console.log("🔗 Bot-Login erfolgreich");
 
-    const PORT = process.env.PORT || 3000;
+    const PORT = process.env.PORT || 8080;
     app.listen(PORT, "0.0.0.0", () => {
       console.log(`🚀 Webhook läuft auf Port ${PORT}`);
     });
