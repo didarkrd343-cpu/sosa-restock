@@ -5,7 +5,7 @@ const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: '500kb' }));
 
-// Nur diese beiden Daten brauchst du in Railway
+// Nur diese beiden Variablen brauchst du in Railway
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const CHANNEL_ID = process.env.CHANNEL_ID;
 
@@ -32,22 +32,23 @@ app.get("/test-restock", async (req, res) => {
     const embed = new EmbedBuilder()
       .setTitle("Test Produkt ✅ Restocked")
       .setDescription("Dies ist ein Test der Restock-Meldung")
-      .setColor(0xdc2626) // 👈 ROTE FARBE EINGESTELLT
+      .setColor(0xdc2626) // 👈 ROTE LEISTE
       .addFields(
         { name: "Produkt", value: "Test Artikel", inline: true },
-        { name: "Preis", value: "5.99 €", inline: true },
-        { name: "Bestand", value: "20", inline: true }
+        { name: "Preis", value: "5.99", inline: true },
+        { name: "Verfügbar", value: "20", inline: true }
       )
       .setTimestamp();
 
-    await kanal.send({ content: "@restock", embeds: [embed] });
-    res.send("✅ Testnachricht mit roter Leiste gesendet!");
+    // 👇 Rolle @restock wird automatisch angepingt
+    await kanal.send({ content: "<@&123456789012345678> Restock! 🚀", embeds: [embed] });
+    res.send("✅ Testnachricht mit Ping gesendet!");
   } catch (err) {
     res.status(500).send("❌ Fehler: " + err.message);
   }
 });
 
-// Restock-Funktion (mit roter Leiste)
+// Restock-Funktion
 app.get("/restock", async (req, res) => {
   if (!istBereit) return res.status(503).send("⏳ Bot noch nicht bereit");
   try {
@@ -55,7 +56,7 @@ app.get("/restock", async (req, res) => {
 
     if (!name || !alt || !neu) {
       return res.send(`
-        ❌ Fülle alle wichtigen Angaben aus:<br>
+        ❌ Aufbau:<br>
         <code>/restock?name=Name&alt=Vorher&neu=Jetzt&preis=9.99&bild=Bild-Link&beschreibung=Text</code>
       `);
     }
@@ -71,18 +72,23 @@ app.get("/restock", async (req, res) => {
     const embed = new EmbedBuilder()
       .setTitle(`${name} ✅ Restocked`)
       .setDescription(beschreibung || `Unser Produkt **${name}** ist wieder auf Lager! 🚀`)
-      .setColor(0xdc2626) // 👈 IMMER ROT BEI JEDER MELDUNG
+      .setColor(0xdc2626) // 👈 IMMER ROT
       .addFields(
         { name: "Variante", value: name, inline: true },
-        { name: "Preis", value: preis ? `${preis} €` : "-", inline: true },
+        { name: "Preis", value: preis ? `${preis}` : "-", inline: true },
         { name: "Verfügbar", value: `${neuZahl}`, inline: true }
       )
       .setTimestamp();
 
     if (bild && bild.startsWith("http")) embed.setImage(bild);
 
-    await kanal.send({ content: "@restock", embeds: [embed] });
-    res.send(`✅ Restock-Meldung für **${name}** gesendet – mit roter Leiste!`);
+    // 👇 HIER KOMMT DER PING AN DIE ROLLE
+    await kanal.send({
+      content: "<@&DEINE_ROLLEN_ID> Restock! Schau schnell vorbei 🔥",
+      embeds: [embed]
+    });
+
+    res.send(`✅ Restock gesendet – Rolle wurde angepingt!`);
   } catch (err) {
     console.error("❌ Fehler:", err.message);
     res.status(500).send("❌ Fehler: " + err.message);
@@ -90,7 +96,7 @@ app.get("/restock", async (req, res) => {
 });
 
 // Bot starten
-client.on("clientReady", () => {
+client.on("ready", () => {
   istBereit = true;
   console.log(`✅ Bot verbunden als ${client.user.tag}`);
   const PORT = process.env.PORT || 8080;
