@@ -4,8 +4,8 @@ const express = require('express');
 const app = express();
 app.use(express.json());
 
-const BOT_TOKEN = process.env.BOT_TOKEN;
-const CHANNEL_ID = process.env.CHANNEL_ID;
+const BOT_TOKEN = process.env.MTUyMDg3NDk2NTc1NzMzMzY0NQ.GAcScV.kP1417yWTWM_3HG_bG3bgnjCgVLv8XC4s9fl8Q;
+const CHANNEL_ID = process.env.1513272345366761553;
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
@@ -50,5 +50,6 @@ app.post("/komerza", async (req, res) => {
 client.on("ready", () => console.log("✅ Bot verbunden"));
 client.login(BOT_TOKEN);
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("🚀 Webhook lauscht auf /komerza"));
+// ✅ Korrigierter Port für Railway
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, '0.0.0.0', () => console.log("🚀 Webhook lauscht auf /komerza"));
