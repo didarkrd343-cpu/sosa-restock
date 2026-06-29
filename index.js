@@ -4,27 +4,24 @@ const express = require('express');
 const app = express();
 app.use(express.json({ limit: '1mb' }));
 
-// ✅ Richtig: Variablennamen, keine direkten Zahlen
-const BOT_TOKEN = process.env.MTUyMDg3NDk2NTc1NzMzMzY0NQ.GAcScV.kP1417yWTWM_3HG_bG3bgnjCgVLv8XC4s9fl8Q;
-const CHANNEL_ID = process.env.1513272345366761553;
+// ✅ RICHTIG: Namen statt Zahlen
+const BOT_TOKEN = process.env.BOT_TOKEN;
+const CHANNEL_ID = process.env.CHANNEL_ID;
 
-// Prüfung, ob die Variablen vorhanden sind
 if (!BOT_TOKEN || !CHANNEL_ID) {
-  console.error("❌ FEHLER: BOT_TOKEN oder CHANNEL_ID fehlen in Railway unter Variables!");
+  console.error("❌ Variablen fehlen in Railway → Variables!");
   process.exit(1);
 }
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 app.post("/komerza", async (req, res) => {
-  console.log("📥 Daten erhalten:", req.body);
-
+  console.log("📥 Daten empfangen:", req.body);
   const alt = Number(req.body.old_quantity ?? req.body.previous_quantity ?? 0);
   const neu = Number(req.body.new_quantity ?? req.body.current_quantity ?? 0);
 
-  console.log(`📊 Bestand: alt=${alt} | neu=${neu}`);
+  console.log(`📊 Bestand: alt=${alt} → neu=${neu}`);
 
-  // Nur senden, wenn der Bestand steigt
   if (neu <= alt) {
     console.log("ℹ️ Keine Erhöhung → ignoriert");
     return res.json({ status: "ignoriert" });
@@ -47,7 +44,7 @@ app.post("/komerza", async (req, res) => {
 
   try {
     const kanal = client.channels.cache.get(CHANNEL_ID);
-    if (!kanal) throw new Error(`Kanal nicht gefunden mit ID ${CHANNEL_ID}`);
+    if (!kanal) throw new Error("Kanal nicht gefunden");
     await kanal.send({ content: "@restock", embeds: [embed] });
     console.log("✅ Nachricht gesendet");
     return res.json({ status: "ok" });
