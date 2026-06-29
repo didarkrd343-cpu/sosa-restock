@@ -5,7 +5,6 @@ const axios = require('axios');
 const app = express();
 app.use(express.json({ limit: '1mb' }));
 
-// Umgebungsvariablen
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const CHANNEL_ID = process.env.CHANNEL_ID;
 const KOMERZA_API_KEY = process.env.KOMERZA_API_KEY;
@@ -48,7 +47,7 @@ async function pruefeBestaende() {
 
     const antwort = await axios.get(`${KOMERZA_STORE_URL}/api/v1/products`, {
       headers: {
-        "X-API-KEY": KOMERZA_API_KEY,
+        "Authorization": `Bearer ${KOMERZA_API_KEY}`, // 👈 Standard für mykomerza
         "Accept": "application/json"
       },
       timeout: 12000
@@ -87,11 +86,29 @@ async function pruefeBestaende() {
 
     console.log("✅ Prüfung abgeschlossen");
   } catch (err) {
-    console.error("❌ Fehler:", err.response?.status || "unbekannt", err.message);
+    if (err.response?.status === 403) {
+      console.log("⚠️ 403: Versuche alternative Authentifizierung...");
+      try {
+        const antwort2 = await axios.get(`${KOMERZA_STORE_URL}/api/v1/products`, {
+          headers: {
+            "X-API-KEY": KOMERZA_API_KEY, // 👈 zweite Variante
+            "Accept": "application/json"
+          },
+          timeout: 12000
+        });
+        const produkte = Array.isArray(antwort2.data) ? antwort2.data : antwort2.data.data || [];
+        console.log(`✅ Erfolg! ${produkte.length} Produkte geladen`);
+      } catch (err2) {
+        console.error("❌ Endgültig fehlgeschlagen:", err2.response?.status || err2.message);
+      }
+    } else {
+      console.error("❌ Fehler:", err.response?.status || "unbekannt", err.message);
+    }
   }
 }
 
-client.on("ready", () => {
+// ✅ Korrigiert die Warnung: nutze "clientReady" statt "ready"
+client.on("clientReady", () => {
   console.log(`✅ Bot verbunden als ${client.user.tag}`);
   const PORT = process.env.PORT || 8080;
   app.listen(PORT, "0.0.0.0", () => console.log(`🚀 Läuft auf Port ${PORT}`));
