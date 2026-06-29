@@ -21,21 +21,21 @@ app.get("/", (req, res) => {
 });
 
 app.get("/test-restock", async (req, res) => {
-  if (!istBereit) return res.status(503).send("⏳ Bot noch nicht bereit – bitte kurz warten");
+  if (!istBereit) return res.status(503).send("⏳ Bot noch nicht bereit");
   try {
     const kanal = client.channels.cache.get(CHANNEL_ID);
-    if (!kanal) return res.status(404).send("❌ Discord-Kanal nicht gefunden");
+    if (!kanal) return res.status(404).send("❌ Kanal nicht gefunden");
 
     const embed = new EmbedBuilder()
       .setTitle("Spotify Lifetime Key ✅ Restocked")
-      .setDescription("Our product **Spotify Lifetime Key** has just been restocked!")
+      .setDescription("Our product **Spotify Lifetime Key** has just been restocked! 🚀")
       .setColor(0x1DB954)
       .addFields(
         { name: "Variant", value: "Spotify Lifetime Key", inline: true },
         { name: "Price", value: "$4.50", inline: true },
         { name: "Stock", value: "509", inline: true }
       )
-      .setImage("https://i.imgur.com/3JZ7k8L.png") // Beispielbild Spotify
+      .setImage("https://i.imgur.com/3JZ7k8L.png")
       .setTimestamp();
 
     await kanal.send({ content: "@restock", embeds: [embed] });
@@ -45,7 +45,7 @@ app.get("/test-restock", async (req, res) => {
   }
 });
 
-// Restock mit allen Optionen
+// Restock mit allen Funktionen
 app.get("/restock", async (req, res) => {
   if (!istBereit) return res.status(503).send("⏳ Bot noch nicht bereit");
   try {
@@ -54,7 +54,7 @@ app.get("/restock", async (req, res) => {
     if (!name || !alt || !neu) {
       return res.send(`
         ❌ Aufbau:<br>
-        <code>/restock?name=Name&alt=Vorher&neu=Jetzt&preis=4.50&link=https://deinlink.com&bild=https://dein-bild.de/foto.jpg&beschreibung=Text</code>
+        <code>/restock?name=Produktname&alt=Vorher&neu=Jetzt&preis=4.50&link=https://deinlink.com&bild=https://bild-url.de.jpg&beschreibung=Text</code>
       `);
     }
 
@@ -64,11 +64,11 @@ app.get("/restock", async (req, res) => {
     if (neuZahl <= altZahl) return res.send("ℹ️ Keine Erhöhung – keine Nachricht gesendet");
 
     const kanal = client.channels.cache.get(CHANNEL_ID);
-    if (!kanal) return res.send("❌ Discord-Kanal nicht gefunden");
+    if (!kanal) return res.send("❌ Kanal nicht gefunden");
 
     const embed = new EmbedBuilder()
       .setTitle(`${name} ✅ Restocked`)
-      .setDescription(beschreibung || `Our product **${name}** has just been restocked!`)
+      .setDescription(beschreibung || `Our product **${name}** has just been restocked! 🚀`)
       .setColor(0x22c55e)
       .addFields(
         { name: "Variant", value: name, inline: true },
@@ -77,11 +77,13 @@ app.get("/restock", async (req, res) => {
       )
       .setTimestamp();
 
-    if (link) embed.setURL(link);
-    if (bild) embed.setImage(bild);
+    // Link nur hinzufügen, wenn er gültig ist
+    if (link && link.startsWith("http")) embed.setURL(link);
+    // Bild nur hinzufügen, wenn es eine gültige URL ist
+    if (bild && bild.startsWith("http")) embed.setImage(bild);
 
     await kanal.send({ content: "@restock", embeds: [embed] });
-    res.send(`✅ Nachricht mit Bild & Details gesendet!`);
+    res.send(`✅ Nachricht erfolgreich erstellt!`);
   } catch (err) {
     console.error("❌ Fehler:", err.message);
     res.status(500).send("❌ Fehler: " + err.message);
@@ -92,7 +94,7 @@ client.on("clientReady", () => {
   istBereit = true;
   console.log(`✅ Bot verbunden als ${client.user.tag}`);
   const PORT = process.env.PORT || 8080;
-  app.listen(PORT, "0.0.0.0", () => console.log(`🚀 Dienst läuft auf Port ${PORT}`));
+  app.listen(PORT, "0.0.0.0", () => console.log(`🚀 Läuft auf Port ${PORT}`));
 });
 
 client.login(BOT_TOKEN).catch(err => {
