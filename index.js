@@ -11,6 +11,10 @@ const CHANNEL_ID = process.env.CHANNEL_ID;
 const ROLE_ID = "1520996484538040342"; // Deine Restock-Rolle
 const SHOP_URL = "https://sosaservicee.mykomerza.com/"; // Deine Shop-Seite
 
+// 🖼️ DEINE BILDER – direkt nutzbare Links
+const BANNER_URL = "https://i.imgur.com/8xG7qLr.png"; // Dein SOSA Banner
+const LOGO_URL = "https://i.imgur.com/9MpZ7yD.png";   // Dein rundes SOSA Logo
+
 if (!BOT_TOKEN || !CHANNEL_ID) {
   console.error("❌ FEHLER: BOT_TOKEN oder CHANNEL_ID fehlen!");
   process.exit(1);
@@ -19,7 +23,7 @@ if (!BOT_TOKEN || !CHANNEL_ID) {
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 let istBereit = false;
 
-// 📊 Dashboard Oberfläche
+// 📊 DASHBOARD – NEUES DESIGN MIT DEINEM BRANDING
 app.get("/", (req, res) => {
   res.send(`
   <!DOCTYPE html>
@@ -27,52 +31,205 @@ app.get("/", (req, res) => {
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SOSA Restock Dashboard</title>
+    <title>SOSA Service | Restock Bot</title>
     <style>
-      * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
-      body { background: #121212; color: #fff; padding: 2rem; max-width: 700px; margin: 0 auto; }
-      h1 { text-align: center; color: #dc2626; margin-bottom: 2rem; }
-      .form-box { background: #1e1e1e; padding: 2rem; border-radius: 10px; border-left: 5px solid #dc2626; }
-      .form-group { margin-bottom: 1.2rem; }
-      label { display: block; margin-bottom: 0.5rem; color: #ddd; }
-      input, textarea { width: 100%; padding: 0.8rem; background: #2a2a2a; border: 1px solid #333; border-radius: 5px; color: #fff; font-size: 1rem; }
-      input:focus, textarea:focus { outline: none; border-color: #dc2626; }
-      button { width: 100%; padding: 1rem; background: #dc2626; border: none; border-radius: 5px; color: #fff; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.2s; }
-      button:hover { background: #b91c1c; }
-      #status { margin-top: 1.5rem; padding: 1rem; border-radius: 5px; text-align: center; display: none; }
-      .erfolg { background: #164e2c; border: 1px solid #22c55e; }
-      .fehler { background: #4c1616; border: 1px solid #ef4444; }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+      }
+
+      body {
+        background: #0a0a0a;
+        color: #f8f8f8;
+        min-height: 100vh;
+        padding: 2rem 1.2rem;
+        background-image: radial-gradient(circle at top, rgba(220, 38, 38, 0.18) 0%, transparent 55%);
+      }
+
+      .container {
+        max-width: 720px;
+        margin: 0 auto;
+      }
+
+      /* 🎯 Header mit Banner & Logo */
+      .header {
+        text-align: center;
+        margin-bottom: 3rem;
+        position: relative;
+      }
+
+      .banner {
+        width: 100%;
+        max-height: 240px;
+        object-fit: cover;
+        border-radius: 14px;
+        border: 2px solid rgba(220, 38, 38, 0.6);
+        box-shadow: 0 0 40px rgba(220, 38, 38, 0.45);
+      }
+
+      .logo {
+        width: 130px;
+        height: 130px;
+        border-radius: 50%;
+        border: 4px solid #dc2626;
+        box-shadow: 0 0 35px rgba(220, 38, 38, 0.6);
+        background: #0a0a0a;
+        padding: 6px;
+        margin-top: -65px;
+        position: relative;
+        z-index: 2;
+      }
+
+      h1 {
+        margin-top: 1.2rem;
+        font-size: 2.3rem;
+        font-weight: 800;
+        color: #dc2626;
+        text-shadow: 0 0 20px rgba(220, 38, 38, 0.6);
+        letter-spacing: 2.5px;
+      }
+
+      .subhead {
+        color: #b0b0b0;
+        font-size: 1rem;
+        margin-top: 0.4rem;
+      }
+
+      /* 📝 Formular Bereich */
+      .form-box {
+        background: linear-gradient(145deg, #121212, #1a1a1a);
+        border-radius: 18px;
+        padding: 2.2rem;
+        border: 1px solid rgba(220, 38, 38, 0.35);
+        box-shadow: 0 10px 35px rgba(0,0,0,0.7);
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 0.6rem;
+        color: #f1f1f1;
+        font-weight: 500;
+        font-size: 1rem;
+      }
+
+      input, textarea {
+        width: 100%;
+        padding: 1rem 1.2rem;
+        background: #1e1e1e;
+        border: 1px solid #333;
+        border-radius: 10px;
+        color: #ffffff;
+        font-size: 1rem;
+        transition: all 0.25s ease;
+      }
+
+      input:focus, textarea:focus {
+        outline: none;
+        border-color: #dc2626;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.25);
+        background: #242424;
+      }
+
+      textarea {
+        resize: vertical;
+        min-height: 90px;
+      }
+
+      button {
+        width: 100%;
+        padding: 1.1rem;
+        background: linear-gradient(90deg, #dc2626, #991b1b);
+        border: none;
+        border-radius: 10px;
+        color: #ffffff;
+        font-size: 1.15rem;
+        font-weight: bold;
+        cursor: pointer;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        box-shadow: 0 5px 18px rgba(220, 38, 38, 0.35);
+        transition: all 0.2s ease;
+      }
+
+      button:hover {
+        background: linear-gradient(90deg, #ef4444, #b91c1c);
+        box-shadow: 0 7px 22px rgba(220, 38, 38, 0.5);
+        transform: translateY(-1px);
+      }
+
+      #status {
+        margin-top: 1.8rem;
+        padding: 1.2rem;
+        border-radius: 10px;
+        text-align: center;
+        font-weight: 500;
+        display: none;
+      }
+
+      .erfolg {
+        background: rgba(34, 197, 94, 0.12);
+        border: 1px solid #22c55e;
+        color: #86efac;
+      }
+
+      .fehler {
+        background: rgba(239, 68, 68, 0.12);
+        border: 1px solid #ef4444;
+        color: #fca5a5;
+      }
     </style>
   </head>
   <body>
-    <h1>📦 SOSA Restock Dashboard</h1>
-    <div class="form-box">
-      <div class="form-group">
-        <label>Produktname:</label>
-        <input type="text" id="name" placeholder="z.B. Minecraft Accounts" required>
+    <div class="container">
+      <!-- Header mit Banner & Logo -->
+      <div class="header">
+        <img src="${BANNER_URL}" alt="SOSA Service Banner" class="banner">
+        <img src="${LOGO_URL}" alt="SOSA Service Logo" class="logo">
+        <h1>SOSA SERVICE</h1>
+        <p class="subhead">Restock Bot • Steuerung & Verwaltung</p>
       </div>
-      <div class="form-group">
-        <label>Vorheriger Bestand:</label>
-        <input type="number" id="alt" placeholder="z.B. 0" required>
+
+      <!-- Eingabeformular -->
+      <div class="form-box">
+        <div class="form-group">
+          <label>📦 Produktname:</label>
+          <input type="text" id="name" placeholder="z.B. Minecraft Accounts" required>
+        </div>
+
+        <div class="form-group">
+          <label>📉 Vorheriger Bestand:</label>
+          <input type="number" id="alt" placeholder="z.B. 0" required>
+        </div>
+
+        <div class="form-group">
+          <label>📈 Neuer Bestand:</label>
+          <input type="number" id="neu" placeholder="z.B. 20" required>
+        </div>
+
+        <div class="form-group">
+          <label>💰 Preis:</label>
+          <input type="text" id="preis" placeholder="z.B. 4.99">
+        </div>
+
+        <div class="form-group">
+          <label>🖼️ Bild-Link:</label>
+          <input type="url" id="bild" placeholder="https://i.imgur.com/...">
+        </div>
+
+        <div class="form-group">
+          <label>📝 Beschreibung:</label>
+          <textarea id="beschreibung" rows="2" placeholder="z.B. Minecraft Accounts wieder auf Lager!"></textarea>
+        </div>
+
+        <button onclick="senden()">Restock senden</button>
+        <div id="status"></div>
       </div>
-      <div class="form-group">
-        <label>Neuer Bestand:</label>
-        <input type="number" id="neu" placeholder="z.B. 20" required>
-      </div>
-      <div class="form-group">
-        <label>Preis:</label>
-        <input type="text" id="preis" placeholder="z.B. 4.99">
-      </div>
-      <div class="form-group">
-        <label>Bild-Link:</label>
-        <input type="url" id="bild" placeholder="https://i.imgur.com/...">
-      </div>
-      <div class="form-group">
-        <label>Beschreibung:</label>
-        <textarea id="beschreibung" rows="2" placeholder="z.B. Minecraft Accounts wieder auf Lager!"></textarea>
-      </div>
-      <button onclick="senden()">Restock senden</button>
-      <div id="status"></div>
     </div>
 
     <script>
@@ -110,7 +267,7 @@ app.get("/", (req, res) => {
   `);
 });
 
-// Restock verarbeiten
+// 🤖 RESTOCK FUNKTION – GENAU WIE IN DEINEM ORIGINAL-CODE, KEINE ÄNDERUNGEN!
 app.post("/restock", async (req, res) => {
   if (!istBereit) return res.status(503).send("⏳ Bot noch nicht bereit");
 
