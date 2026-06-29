@@ -5,15 +5,15 @@ const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: '500kb' }));
 
-// 📋 DEINE EINSTELLUNGEN (BLEIBEN ALLE UNVERÄNDERT)
+// 📋 DEINE EINSTELLUNGEN
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const CHANNEL_ID = process.env.CHANNEL_ID;
 const ROLE_ID = "1520996484538040342";
 const SHOP_URL = "https://sosaservicee.mykomerza.com/";
 
-// 🖼️ DEINE ECHTEN BILDER (direkte Links von deinen Uploads)
-const BANNER_URL = "https://i.imgur.com/0Vq8kQH.png";
-const LOGO_URL = "https://i.imgur.com/xqQ8X9b.png";
+// 🖼️ DEINE BILDER (gültige Links)
+const BANNER_URL = "https://i.imgur.com/Td9AA5M.png"; // Banner
+const LOGO_URL = "https://i.imgur.com/Td9AA5M.png";   // Logo
 
 if (!BOT_TOKEN || !CHANNEL_ID) {
   console.error("❌ FEHLER: BOT_TOKEN oder CHANNEL_ID fehlen!");
@@ -23,7 +23,7 @@ if (!BOT_TOKEN || !CHANNEL_ID) {
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 let istBereit = false;
 
-// 🚀 DASHBOARD – VOLLSTÄNDIG ÜBERARBEITET & PROFESSIONELL
+// 🚀 DASHBOARD mit deinem Design
 app.get("/", (req, res) => {
   res.send(`
   <!DOCTYPE html>
@@ -37,7 +37,7 @@ app.get("/", (req, res) => {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
-        font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        font-family: 'Segoe UI', Roboto, sans-serif;
       }
 
       body {
@@ -55,11 +55,9 @@ app.get("/", (req, res) => {
         margin: 0 auto;
       }
 
-      /* 🎯 HEADER BEREICH */
       .header {
         text-align: center;
         margin-bottom: 3rem;
-        position: relative;
       }
 
       .banner {
@@ -100,17 +98,14 @@ app.get("/", (req, res) => {
         color: #a0a0a0;
         font-size: 1.05rem;
         margin-top: 0.5rem;
-        font-weight: 400;
       }
 
-      /* 📋 FORMULAR KARTE */
       .form-card {
         background: linear-gradient(145deg, #0e0e0e, #161616);
         border-radius: 18px;
         padding: 2.4rem;
         border: 1px solid rgba(220, 38, 38, 0.3);
-        box-shadow: 0 10px 40px rgba(0,0,0,0.7), 
-                    inset 0 0 0 1px rgba(255,255,255,0.04);
+        box-shadow: 0 10px 40px rgba(0,0,0,0.7), inset 0 0 0 1px rgba(255,255,255,0.04);
       }
 
       .form-group {
@@ -170,7 +165,6 @@ app.get("/", (req, res) => {
         transform: translateY(-1px);
       }
 
-      /* 📊 STATUS NACH SENDEN */
       #status {
         margin-top: 2rem;
         padding: 1.3rem;
@@ -195,7 +189,6 @@ app.get("/", (req, res) => {
   </head>
   <body>
     <div class="container">
-      <!-- KOPF MIT BANNER & LOGO -->
       <div class="header">
         <img src="${BANNER_URL}" alt="SOSA Service Banner" class="banner">
         <div class="logo-wrapper">
@@ -205,11 +198,10 @@ app.get("/", (req, res) => {
         <p class="subhead">Restock Bot • Steuerung & Verwaltung</p>
       </div>
 
-      <!-- EINGABEFORMULAR -->
       <div class="form-card">
         <div class="form-group">
           <label>📦 Produktname</label>
-          <input type="text" id="name" placeholder="z.B. Minecraft Accounts / GTA V Accounts" required>
+          <input type="text" id="name" placeholder="z.B. FiveM Ready Account" required>
         </div>
 
         <div class="form-group">
@@ -219,12 +211,12 @@ app.get("/", (req, res) => {
 
         <div class="form-group">
           <label>📈 Neuer Bestand</label>
-          <input type="number" id="neu" placeholder="z.B. 25" required>
+          <input type="number" id="neu" placeholder="z.B. 21" required>
         </div>
 
         <div class="form-group">
-          <label>💰 Preis</label>
-          <input type="text" id="preis" placeholder="z.B. 4.99">
+          <label>💰 Preis (nur Zahl)</label>
+          <input type="text" id="preis" placeholder="z.B. 0.15">
         </div>
 
         <div class="form-group">
@@ -234,7 +226,7 @@ app.get("/", (req, res) => {
 
         <div class="form-group">
           <label>📝 Beschreibung</label>
-          <textarea id="beschreibung" placeholder="z.B. Minecraft Accounts mit vollem Zugriff & Garantie wieder auf Lager!"></textarea>
+          <textarea id="beschreibung" placeholder="z.B. Unser Produkt ist wieder auf Lager!"></textarea>
         </div>
 
         <button onclick="senden()">Restock senden</button>
@@ -277,7 +269,7 @@ app.get("/", (req, res) => {
   `);
 });
 
-// 🤖 RESTOCK FUNKTION FÜR DISCORD – BLEIBT 100% WIE VORHER
+// 🤖 RESTOCK Funktion für Discord mit € Zeichen
 app.post("/restock", async (req, res) => {
   if (!istBereit) return res.status(503).send("⏳ Bot ist noch nicht bereit – bitte warten");
 
@@ -300,16 +292,19 @@ app.post("/restock", async (req, res) => {
     const kanal = client.channels.cache.get(CHANNEL_ID);
     if (!kanal) return res.status(404).send("❌ Discord-Kanal nicht gefunden!");
 
+    // ✅ Preis mit €-Zeichen
+    const preisMitEuro = preis ? `${preis} €` : "-";
+
     const embed = new EmbedBuilder()
       .setTitle(`${name} Restocked`)
-      .setDescription(beschreibung || `✅ **${name}** ist wieder auf Lager!`)
+      .setDescription(beschreibung || `Unser Produkt **${name}** ist wieder auf Lager!`)
       .setURL(SHOP_URL)
       .setColor(0xdc2626)
       .setThumbnail(LOGO_URL)
       .addFields(
-        { name: "📦 Variante", value: name, inline: true },
-        { name: "💲 Preis", value: preis || "-", inline: true },
-        { name: "📊 Verfügbar", value: `${neuZahl}`, inline: true }
+        { name: "Variante", value: name, inline: true },
+        { name: "Preis", value: preisMitEuro, inline: true },
+        { name: "Verfügbar", value: `${neuZahl}`, inline: true }
       )
       .setTimestamp()
       .setFooter({ text: "SOSA Service • Restock Bot", iconURL: LOGO_URL });
@@ -328,7 +323,7 @@ app.post("/restock", async (req, res) => {
   }
 });
 
-// 🚀 BOT STARTEN
+// 🚀 Bot starten
 client.on("ready", () => {
   istBereit = true;
   console.log(`✅ Bot eingeloggt als: ${client.user.tag}`);
