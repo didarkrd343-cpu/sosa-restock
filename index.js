@@ -16,7 +16,12 @@ if (!BOT_TOKEN || !CHANNEL_ID) {
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
-// Webhook Empfang
+// 🟢 NEU: Antwort bei Aufruf im Browser (GET)
+app.get("/komerza", (req, res) => {
+  res.send("✅ Webhook ist aktiv! Nutze nur POST-Anfragen von Komerza.");
+});
+
+// Webhook Empfang für POST
 app.post("/komerza", async (req, res) => {
   console.log("📥 Daten erhalten:", req.body);
 
@@ -58,10 +63,9 @@ app.post("/komerza", async (req, res) => {
   }
 });
 
-// Bot Start mit korrekter Ereignisbehandlung
+// Bot Start
 client.on("clientReady", () => {
   console.log(`✅ Bot verbunden als ${client.user.tag}`);
-  // Server erst NACH erfolgreicher Verbindung starten
   const PORT = process.env.PORT || 8080;
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`🚀 Webhook läuft auf Port ${PORT}`);
