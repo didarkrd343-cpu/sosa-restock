@@ -1,19 +1,16 @@
 {
   "name": "sosa-restock",
   "version": "1.0.0",
-  "description": "Restock Benachrichtigungen für Komerza",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
     "discord.js": "^14.16.3",
-    "express": "^4.21.2",
-    "axios": "^1.7.9"
+    "express": "^4.21.2"
   },
   "engines": {
     "node": ">=18.0.0"
   },
-  "author": "",
   "license": "MIT"
 }
