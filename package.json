@@ -1,13 +1,13 @@
 {
-  "name": "komerza-restock",
+  "name": "sosa-restock",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "discord.js": "^14.15.0",
-    "express": "^4.21.0"
+    "discord.js": "^14.16.3",
+    "express": "^4.21.2"
   },
   "engines": {
     "node": ">=18.0.0"
